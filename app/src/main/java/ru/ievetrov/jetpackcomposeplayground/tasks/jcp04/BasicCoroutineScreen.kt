@@ -29,18 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundTheme
 
-/**
- * JCP-04: Базовая работа с корутинами
- *
- * Задание:
- * 1. Создать экран с кнопкой "Запустить корутину"
- * 2. Реализовать запуск корутины с помощью LaunchedEffect и rememberCoroutineScope
- * 3. Добавить индикатор загрузки, который показывается во время работы корутины
- * 4. Использовать delay для имитации долгой операции
- * 5. После завершения корутины показать результат
- * 6. Реализовать обработку ошибок с помощью try-catch
- */
-
 @Composable
 fun BasicCoroutineScreen() {
     JetpackComposePlaygroundTheme {
@@ -48,116 +36,144 @@ fun BasicCoroutineScreen() {
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.background
         ) {
-            Column {
+            val scope = rememberCoroutineScope()
+            var launchedEffectRunId by remember { mutableStateOf(0) }
+            var isLoading by remember { mutableStateOf(false) }
+            var progressMessage by remember { mutableStateOf("Корутину еще не запускали") }
+            var result by remember { mutableStateOf("") }
+            var errorMessage by remember { mutableStateOf<String?>(null) }
+
+            suspend fun runDemoCoroutine(startedBy: String) {
+                isLoading = true
+                result = ""
+                errorMessage = null
+
+                try {
+                    progressMessage = "Запуск: $startedBy"
+
+                    val stepResult = performStepByStepOperation { step ->
+                        progressMessage = step
+                    }
+
+                    val riskyResult = performOperationWithError()
+
+                    result = "$stepResult\n$riskyResult"
+                    progressMessage = "Готово"
+                } catch (e: Exception) {
+                    errorMessage = "Ошибка: ${e.message ?: "неизвестная ошибка"}"
+                    progressMessage = "Операция завершилась с ошибкой"
+                } finally {
+                    isLoading = false
+                }
+            }
+
+            LaunchedEffect(launchedEffectRunId) {
+                if (launchedEffectRunId > 0) {
+                    runDemoCoroutine("LaunchedEffect")
+                }
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
                 Text(
                     text = "JCP-04: Базовая работа с корутинами",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
-/**
-                 * ПРИМЕР из урока - запуск корутин:
-                 * 
-                 * // 1. LaunchedEffect - привязан к жизненному циклу композиции
-                 * LaunchedEffect(key1) {
-                 *     fetchData() // suspend-функция
-                 * }
-                 * 
-                 * // 2. rememberCoroutineScope - для событий пользователя
-                 * val scope = rememberCoroutineScope()
-                 * Button(onClick = { scope.launch { saveData() } }) {
-                 *     Text("Сохранить")
-                 * }
-                 */
-                
-                // TODO 1: Создать экран с кнопкой "Запустить корутину"
-                // var isLoading by remember { mutableStateOf(false) }
-                // var result by remember { mutableStateOf("") }
-                // val scope = rememberCoroutineScope()
-                
-                // TODO 2: Реализовать запуск корутины с LaunchedEffect и rememberCoroutineScope
-                // Button(
-                //     onClick = {
-                //         scope.launch {
-                //             isLoading = true
-                //             result = performLongOperation()
-                //             isLoading = false
-                //         }
-                //     }
-                // ) { Text("Запустить корутину") }
-                
-                // TODO 3: Добавить индикатор загрузки
-                // if (isLoading) {
-                //     CircularProgressIndicator()
-                // }
-                
-                // TODO 4: Использовать delay для имитации долгой операции
-                // suspend fun performLongOperation(): String {
-                //     delay(3000) // 3 секунды
-                //     return "Операция завершена!"
-                // }
-                
-                // TODO 5: После завершения корутины показать результат
-                // if (result.isNotEmpty()) {
-                //     Text(result, color = Color.Green)
-                // }
-                
-                // TODO 6: Реализовать обработку ошибок с try-catch
-                // scope.launch {
-                //     try {
-                //         result = performOperationWithError()
-                //     } catch (e: Exception) {
-                //         result = "Ошибка: ${e.message}"
-                //     } finally {
-                //         isLoading = false
-                //     }
-                // }
-                
-                // Используйте готовые suspend функции ниже
-                
+
                 Text(
-                    "Здесь будет демонстрация LaunchedEffect и rememberCoroutineScope",
+                    text = "Экран показывает два способа запуска: rememberCoroutineScope для событий пользователя и LaunchedEffect для запуска по изменению состояния.",
                     style = MaterialTheme.typography.bodyMedium
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        enabled = !isLoading,
+                        onClick = {
+                            scope.launch {
+                                runDemoCoroutine("rememberCoroutineScope")
+                            }
+                        }
+                    ) {
+                        Text("Запустить корутину")
+                    }
+
+                    Button(
+                        enabled = !isLoading,
+                        onClick = { launchedEffectRunId++ }
+                    ) {
+                        Text("Через LaunchedEffect")
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+
+                    Text(text = progressMessage)
+                }
+
+                if (result.isNotBlank()) {
+                    Text(
+                        text = result,
+                        color = Color(0xFF2E7D32),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "performOperationWithError() иногда специально выбрасывает исключение, чтобы показать обработку try-catch.",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
     }
 }
 
-/**
- * SUSPEND ФУНКЦИИ для задания
- */
-
-// TODO: Раскомментируйте и используйте suspend функции
-
-// Простая долгая операция
 suspend fun performLongOperation(): String {
-    delay(3000) // Имитируем загрузку 3 секунды
+    delay(3000)
     return "Операция успешно завершена!"
 }
 
-// Операция с возможной ошибкой
 suspend fun performOperationWithError(): String {
     delay(2000)
+
     if (Math.random() > 0.5) {
         throw RuntimeException("Случайная ошибка в операции")
     }
+
     return "Операция с риском завершена!"
 }
 
-// Операция с поэтапным прогрессом
 suspend fun performStepByStepOperation(onProgress: (String) -> Unit): String {
     onProgress("Начинаем операцию...")
     delay(1000)
-    
+
     onProgress("Выполняем шаг 1...")
     delay(1000)
-    
+
     onProgress("Выполняем шаг 2...")
     delay(1000)
-    
+
     onProgress("Завершаем операцию...")
     delay(500)
-    
+
     return "Все шаги выполнены!"
 }
 

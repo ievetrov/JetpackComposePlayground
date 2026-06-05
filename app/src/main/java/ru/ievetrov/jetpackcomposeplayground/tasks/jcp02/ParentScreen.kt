@@ -2,12 +2,16 @@ package ru.ievetrov.jetpackcomposeplayground.tasks.jcp02
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,10 @@ import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundThe
 
 @Composable
 fun ParentScreen() {
+    var text by remember { mutableStateOf("") }
+    var counter by remember { mutableIntStateOf(0) }
+    var isEnabled by remember { mutableStateOf(true) }
+
     JetpackComposePlaygroundTheme {
         Surface(
             modifier = Modifier.padding(16.dp),
@@ -35,27 +43,32 @@ fun ParentScreen() {
                     text = "JCP-02: Подъём состояния",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
-                // TODO: Создайте состояния, которые будут подниматься от дочернего компонента
-                // val text = remember { mutableStateOf("") }
-                // val counter = remember { mutableStateOf(0) }
-                // val isEnabled = remember { mutableStateOf(true) }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-                
-                // TODO: Отображение текущих значений состояний в родительском компоненте
+
+                Text(
+                    text = "Текст: $text",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Счётчик: $counter",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Активен: ${if (isEnabled) "Да" else "Нет"}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-                
-                // TODO: Подключение дочернего компонента с передачей состояний
-                // ChildComponent(
-                //     value = text.value,
-                //     onValueChange = { text.value = it },
-                //     counterValue = counter.value,
-                //     onIncrementCounter = { counter.value++ },
-                //     isEnabled = isEnabled.value,
-                //     onToggleEnabled = { isEnabled.value = !isEnabled.value }
-                // )
+
+                ChildComponent(
+                    value = text,
+                    onValueChange = { text = it },
+                    counterValue = counter,
+                    onIncrementCounter = { counter++ },
+                    isEnabled = isEnabled,
+                    onToggleEnabled = { isEnabled = !isEnabled }
+                )
             }
         }
     }
@@ -65,4 +78,4 @@ fun ParentScreen() {
 @Composable
 fun ParentScreenPreview() {
     ParentScreen()
-} 
+}

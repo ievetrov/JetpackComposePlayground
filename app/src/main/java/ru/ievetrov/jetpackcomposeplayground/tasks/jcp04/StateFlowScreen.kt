@@ -1,5 +1,6 @@
 package ru.ievetrov.jetpackcomposeplayground.tasks.jcp04
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,100 +15,122 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundTheme
 
-/**
- * JCP-04: Работа с StateFlow
- *
- * Задание:
- * 1. Создать MutableStateFlow для хранения состояния формы
- * 2. Реализовать экран с полями ввода (имя, email, возраст)
- * 3. Обновлять StateFlow при изменении полей
- * 4. Добавить валидацию полей в реальном времени
- * 5. Использовать collectAsState для связи с Compose UI
- * 6. Реализовать кнопку отправки, активную только при валидных данных
- */
-
 @Composable
-fun StateFlowScreen() {
+fun StateFlowScreen(
+    stateHolder: FormStateHolder = viewModel()
+) {
     JetpackComposePlaygroundTheme {
         Surface(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.background
         ) {
-            Column {
+            val formState by stateHolder.formState.collectAsState()
+            val validationState by stateHolder.validationState.collectAsState()
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "JCP-04: Работа с StateFlow",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
-/**
-                 * ПРИМЕР из урока - работа с StateFlow:
-                 * 
-                 * class FormViewModel : ViewModel() {
-                 *     private val _formState = MutableStateFlow(FormState())
-                 *     val formState: StateFlow<FormState> = _formState.asStateFlow()
-                 *     
-                 *     fun updateName(name: String) {
-                 *         _formState.value = _formState.value.copy(name = name)
-                 *     }
-                 * }
-                 */
-                
-                // TODO 1: Создать MutableStateFlow для хранения состояния формы
-                // Используйте готовый FormStateHolder класс ниже
-                
-                // TODO 2: Реализовать экран с полями ввода (имя, email, возраст)
-                // val stateHolder: FormStateHolder = viewModel()
-                // val formState by stateHolder.formState.collectAsState()
-                
-                // TODO 3: Обновлять StateFlow при изменении полей
-                // OutlinedTextField(
-                //     value = formState.name,
-                //     onValueChange = { stateHolder.updateName(it) },
-                //     label = { Text("Имя") }
-                // )
-                
-                // TODO 4: Добавить валидацию полей в реальном времени
-                // val isNameValid = formState.name.length >= 2
-                // val isEmailValid = formState.email.contains("@")
-                
-                // TODO 5: Использовать collectAsState для связи с Compose UI
-                // val combinedState by stateHolder.validationState.collectAsState()
-                
-                // TODO 6: Реализовать кнопку отправки, активную только при валидных данных
-                // Button(
-                //     onClick = { stateHolder.submitForm() },
-                //     enabled = combinedState.isFormValid
-                // ) { Text("Отправить") }
-                
-                Text(
-                    "Здесь будет форма с StateFlow и валидацией полей",
-                    style = MaterialTheme.typography.bodyMedium
+
+                OutlinedTextField(
+                    value = formState.name,
+                    onValueChange = { stateHolder.updateName(it) },
+                    label = { Text("Имя") },
+                    isError = formState.name.isNotEmpty() && !validationState.isNameValid,
+                    modifier = Modifier.fillMaxWidth()
                 )
+
+                ValidationMessage(
+                    isVisible = formState.name.isNotEmpty() && !validationState.isNameValid,
+                    text = "Имя должно содержать минимум 2 символа"
+                )
+
+                OutlinedTextField(
+                    value = formState.email,
+                    onValueChange = { stateHolder.updateEmail(it) },
+                    label = { Text("Email") },
+                    isError = formState.email.isNotEmpty() && !validationState.isEmailValid,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                ValidationMessage(
+                    isVisible = formState.email.isNotEmpty() && !validationState.isEmailValid,
+                    text = "Email должен содержать @ и точку"
+                )
+
+                OutlinedTextField(
+                    value = formState.age,
+                    onValueChange = { stateHolder.updateAge(it) },
+                    label = { Text("Возраст") },
+                    isError = formState.age.isNotEmpty() && !validationState.isAgeValid,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                ValidationMessage(
+                    isVisible = formState.age.isNotEmpty() && !validationState.isAgeValid,
+                    text = "Возраст должен быть числом от 18 до 100"
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Форма валидна: ${if (validationState.isFormValid) "да" else "нет"}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Button(
+                    enabled = validationState.isFormValid,
+                    onClick = { stateHolder.submitForm() }
+                ) {
+                    Text("Отправить")
+                }
+
+                if (formState.submittedMessage.isNotBlank()) {
+                    Text(
+                        text = formState.submittedMessage,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
 }
 
-/**
- * ЗАГОТОВКА StateHolder класса для задания
- */
+@Composable
+private fun ValidationMessage(
+    isVisible: Boolean,
+    text: String
+) {
+    if (isVisible) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
 
-// TODO: Раскомментируйте и доработайте классы
 data class FormState(
     val name: String = "",
     val email: String = "",
-    val age: String = ""
+    val age: String = "",
+    val submittedMessage: String = ""
 )
 
 data class ValidationState(
@@ -119,39 +142,62 @@ data class ValidationState(
         get() = isNameValid && isEmailValid && isAgeValid
 }
 
-// TODO: Раскомментируйте StateHolder класс
-// class FormStateHolder : ViewModel() {
-//     private val _formState = MutableStateFlow(FormState())
-//     val formState: StateFlow<FormState> = _formState.asStateFlow()
-//     
-//     val validationState: StateFlow<ValidationState> = 
-//         formState.combine(formState) { form, _ ->
-//             ValidationState(
-//                 isNameValid = form.name.length >= 2,
-//                 isEmailValid = form.email.contains("@") && form.email.contains("."),
-//                 isAgeValid = form.age.toIntOrNull()?.let { it in 18..100 } ?: false
-//             )
-//         }
-//     
-//     fun updateName(name: String) {
-//         _formState.value = _formState.value.copy(name = name)
-//     }
-//     
-//     fun updateEmail(email: String) {
-//         _formState.value = _formState.value.copy(email = email)
-//     }
-//     
-//     fun updateAge(age: String) {
-//         _formState.value = _formState.value.copy(age = age)
-//     }
-//     
-//     fun submitForm() {
-//         // Логика отправки формы
-//     }
-// }
+class FormStateHolder : ViewModel() {
+    private val _formState = MutableStateFlow(FormState())
+    val formState: StateFlow<FormState> = _formState.asStateFlow()
+
+    val validationState: StateFlow<ValidationState> = formState
+        .map { form ->
+            ValidationState(
+                isNameValid = form.name.trim().length >= 2,
+                isEmailValid = form.email.contains("@") && form.email.contains("."),
+                isAgeValid = form.age.toIntOrNull()?.let { it in 18..100 } ?: false
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ValidationState()
+        )
+
+    fun updateName(name: String) {
+        _formState.update {
+            it.copy(
+                name = name,
+                submittedMessage = ""
+            )
+        }
+    }
+
+    fun updateEmail(email: String) {
+        _formState.update {
+            it.copy(
+                email = email,
+                submittedMessage = ""
+            )
+        }
+    }
+
+    fun updateAge(age: String) {
+        _formState.update {
+            it.copy(
+                age = age.filter(Char::isDigit),
+                submittedMessage = ""
+            )
+        }
+    }
+
+    fun submitForm() {
+        _formState.update { form ->
+            form.copy(
+                submittedMessage = "Форма отправлена: ${form.name}, ${form.email}, ${form.age}"
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun StateFlowScreenPreview() {
-    StateFlowScreen()
+    StateFlowScreen(stateHolder = FormStateHolder())
 }

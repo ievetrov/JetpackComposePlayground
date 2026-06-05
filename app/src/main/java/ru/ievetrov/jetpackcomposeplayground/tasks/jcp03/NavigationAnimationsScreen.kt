@@ -1,5 +1,7 @@
 package ru.ievetrov.jetpackcomposeplayground.tasks.jcp03
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,115 +36,308 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundTheme
 
-/**
- * JCP-03: Анимации переходов
- *
- * Задание:
- * 1. Создать экран с набором подэкранов
- * 2. Реализовать различные типы анимаций для переходов:
- *   - Fade (появление/исчезновение)
- *   - Slide (скольжение)
- *   - Scale (масштабирование)
- *   - Комбинированные анимации
- * 3. Настроить разные анимации для прямого перехода и для возврата
- * 4. Добавить возможность выбора типа анимации пользователем
- */
+enum class AnimationType {
+    FADE, SLIDE, SCALE, COMBINED
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NavigationAnimationsScreen() {
     JetpackComposePlaygroundTheme {
+        val navController = rememberNavController()
+        var selectedAnimationType by remember { mutableStateOf(AnimationType.FADE) }
+
         Surface(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.background
         ) {
-            Column {
+            Column(modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = "JCP-03: Анимации переходов",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
-/**
-                 * ПРИМЕР анимаций из урока:
-                 * 
-                 * composable(
-                 *     route = "details",
-                 *     enterTransition = { fadeIn() + slideInHorizontally() },
-                 *     exitTransition = { fadeOut() + slideOutHorizontally() },
-                 *     popEnterTransition = { fadeIn() + slideInHorizontally(initialOffsetX = { it }) },
-                 *     popExitTransition = { fadeOut() + slideOutHorizontally(targetOffsetX = { -it }) }
-                 * ) { DetailsScreen() }
-                 */
-                
-                // TODO 1: Создать экран с набором подэкранов
-                // val navController = rememberNavController()
-                // var selectedAnimationType by remember { mutableStateOf(AnimationType.FADE) }
-                
-                // TODO 2: Реализовать различные типы анимаций для переходов
-                // enum class AnimationType { FADE, SLIDE, SCALE, COMBINED }
-                
-                // TODO 3: Настроить разные анимации для прямого перехода и для возврата
-                // NavHost(
-                //     navController = navController,
-                //     startDestination = "home"
-                // ) {
-                //     composable(
-                //         route = "details",
-                //         enterTransition = {
-                //             when (selectedAnimationType) {
-                //                 AnimationType.FADE -> fadeIn()
-                //                 AnimationType.SLIDE -> slideInHorizontally { it }
-                //                 AnimationType.SCALE -> scaleIn()
-                //                 AnimationType.COMBINED -> fadeIn() + slideInHorizontally { it }
-                //             }
-                //         },
-                //         exitTransition = {
-                //             when (selectedAnimationType) {
-                //                 AnimationType.FADE -> fadeOut()
-                //                 AnimationType.SLIDE -> slideOutHorizontally { -it }
-                //                 AnimationType.SCALE -> scaleOut()
-                //                 AnimationType.COMBINED -> fadeOut() + slideOutHorizontally { -it }
-                //             }
-                //         },
-                //         popEnterTransition = {
-                //             when (selectedAnimationType) {
-                //                 AnimationType.FADE -> fadeIn()
-                //                 AnimationType.SLIDE -> slideInHorizontally { -it }
-                //                 AnimationType.SCALE -> scaleIn()
-                //                 AnimationType.COMBINED -> fadeIn() + slideInHorizontally { -it }
-                //             }
-                //         },
-                //         popExitTransition = {
-                //             when (selectedAnimationType) {
-                //                 AnimationType.FADE -> fadeOut()
-                //                 AnimationType.SLIDE -> slideOutHorizontally { it }
-                //                 AnimationType.SCALE -> scaleOut()
-                //                 AnimationType.COMBINED -> fadeOut() + slideOutHorizontally { it }
-                //             }
-                //         }
-                //     ) { AnimatedDetailsScreen() }
-                // }
-                
-                // TODO 4: Добавить возможность выбора типа анимации пользователем
-                // Text("Выберите тип анимации:", style = MaterialTheme.typography.titleMedium)
-                // 
-                // FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                //     AnimationType.values().forEach { type ->
-                //         FilterChip(
-                //             selected = selectedAnimationType == type,
-                //             onClick = { selectedAnimationType = type },
-                //             label = { Text(type.name) }
-                //         )
-                //     }
-                // }
-                
+
                 Text(
-                    "Здесь будет демонстрация анимаций с возможностью выбора типа пользователем",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Выберите тип анимации:",
+                    style = MaterialTheme.typography.titleMedium
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AnimationType.values().forEach { type ->
+                        FilterChip(
+                            selected = selectedAnimationType == type,
+                            onClick = { selectedAnimationType = type },
+                            label = { Text(type.name) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "home",
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    composable(
+                        route = "home",
+                        enterTransition = {
+                            animationEnter(selectedAnimationType, isPop = false)
+                        },
+                        exitTransition = {
+                            animationExit(selectedAnimationType, isPop = false)
+                        },
+                        popEnterTransition = {
+                            animationEnter(selectedAnimationType, isPop = true)
+                        },
+                        popExitTransition = {
+                            animationExit(selectedAnimationType, isPop = true)
+                        }
+                    ) {
+                        AnimationHomeScreen(
+                            selectedAnimationType = selectedAnimationType,
+                            onDetailsClick = { navController.navigate("details") },
+                            onProfileClick = { navController.navigate("profile") }
+                        )
+                    }
+
+                    composable(
+                        route = "details",
+                        enterTransition = {
+                            animationEnter(selectedAnimationType, isPop = false)
+                        },
+                        exitTransition = {
+                            animationExit(selectedAnimationType, isPop = false)
+                        },
+                        popEnterTransition = {
+                            animationEnter(selectedAnimationType, isPop = true)
+                        },
+                        popExitTransition = {
+                            animationExit(selectedAnimationType, isPop = true)
+                        }
+                    ) {
+                        AnimationDetailsScreen(
+                            selectedAnimationType = selectedAnimationType,
+                            onNextClick = { navController.navigate("profile") },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable(
+                        route = "profile",
+                        enterTransition = {
+                            animationEnter(selectedAnimationType, isPop = false)
+                        },
+                        exitTransition = {
+                            animationExit(selectedAnimationType, isPop = false)
+                        },
+                        popEnterTransition = {
+                            animationEnter(selectedAnimationType, isPop = true)
+                        },
+                        popExitTransition = {
+                            animationExit(selectedAnimationType, isPop = true)
+                        }
+                    ) {
+                        AnimationProfileScreen(
+                            selectedAnimationType = selectedAnimationType,
+                            onBackClick = { navController.popBackStack() },
+                            onHomeClick = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+fun animationEnter(
+    animationType: AnimationType,
+    isPop: Boolean
+): EnterTransition {
+    return when (animationType) {
+        AnimationType.FADE -> fadeIn()
+        AnimationType.SLIDE -> {
+            if (isPop) {
+                slideInHorizontally(initialOffsetX = { -it })
+            } else {
+                slideInHorizontally(initialOffsetX = { it })
+            }
+        }
+        AnimationType.SCALE -> scaleIn()
+        AnimationType.COMBINED -> {
+            if (isPop) {
+                fadeIn() + slideInHorizontally(initialOffsetX = { -it }) + scaleIn()
+            } else {
+                fadeIn() + slideInHorizontally(initialOffsetX = { it }) + scaleIn()
+            }
+        }
+    }
+}
+
+fun animationExit(
+    animationType: AnimationType,
+    isPop: Boolean
+): ExitTransition {
+    return when (animationType) {
+        AnimationType.FADE -> fadeOut()
+        AnimationType.SLIDE -> {
+            if (isPop) {
+                slideOutHorizontally(targetOffsetX = { it })
+            } else {
+                slideOutHorizontally(targetOffsetX = { -it })
+            }
+        }
+        AnimationType.SCALE -> scaleOut()
+        AnimationType.COMBINED -> {
+            if (isPop) {
+                fadeOut() + slideOutHorizontally(targetOffsetX = { it }) + scaleOut()
+            } else {
+                fadeOut() + slideOutHorizontally(targetOffsetX = { -it }) + scaleOut()
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimationHomeScreen(
+    selectedAnimationType: AnimationType,
+    onDetailsClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Главный экран",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Текущая анимация: ${selectedAnimationType.name}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onDetailsClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("Открыть Details")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onProfileClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("Открыть Profile")
+        }
+    }
+}
+
+@Composable
+fun AnimationDetailsScreen(
+    selectedAnimationType: AnimationType,
+    onNextClick: () -> Unit,
+    onBackClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Экран Details",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Текущая анимация: ${selectedAnimationType.name}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onNextClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("Перейти к Profile")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onBackClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("Назад")
+        }
+    }
+}
+
+@Composable
+fun AnimationProfileScreen(
+    selectedAnimationType: AnimationType,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Экран Profile",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Текущая анимация: ${selectedAnimationType.name}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onHomeClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("На главный экран")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onBackClick,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        ) {
+            Text("Назад")
         }
     }
 }
@@ -150,4 +346,4 @@ fun NavigationAnimationsScreen() {
 @Composable
 fun NavigationAnimationsScreenPreview() {
     NavigationAnimationsScreen()
-} 
+}
