@@ -32,6 +32,9 @@ import ru.ievetrov.jetpackcomposeplayground.tasks.jcp04.ParallelCoroutinesScreen
 
 import ru.ievetrov.jetpackcomposeplayground.tasks.jcp04.SharedFlowScreen
 import ru.ievetrov.jetpackcomposeplayground.tasks.jcp04.StateFlowScreen
+import ru.ievetrov.jetpackcomposeplayground.tasks.jcp05.ProductUiModel
+import ru.ievetrov.jetpackcomposeplayground.tasks.jcp05.ProductsScreen
+import ru.ievetrov.jetpackcomposeplayground.tasks.jcp05.ProductsUiState
 import ru.ievetrov.jetpackcomposeplayground.ui.screens.MainScreen
 
 /**
@@ -73,6 +76,9 @@ sealed class JCPDestination(val route: String) {
     object FlowErrorHandling : JCPDestination("jcp_04/flow_error_handling")
     object StateFlow : JCPDestination("jcp_04/state_flow")
     object SharedFlow : JCPDestination("jcp_04/shared_flow")
+    
+    // JCP-05: Практика написания тестов
+    object ProductsScreen : JCPDestination("jcp_05/products_screen")
 
 }
 
@@ -170,6 +176,11 @@ fun JetpackComposePlaygroundNavHost() {
                 },
                 navigateToSharedFlow = {
                     navController.navigate(JCPDestination.SharedFlow.route)
+                },
+                
+                // JCP-05
+                navigateToProductsScreen = {
+                    navController.navigate(JCPDestination.ProductsScreen.route)
                 },
 
             )
@@ -285,6 +296,20 @@ fun JetpackComposePlaygroundNavHost() {
         
         composable(JCPDestination.SharedFlow.route) {
             SharedFlowScreen()
+        }
+        
+        // JCP-05: Маршруты
+        composable(JCPDestination.ProductsScreen.route) {
+            ProductsScreen(
+                uiState = ProductsUiState(
+                    isLoading = false,
+                    products = listOf(
+                        ProductUiModel(1, "Молоко", "89.9", "Свежее"),
+                        ProductUiModel(2, "Хлеб", "49.9", "Бородинский"),
+                        ProductUiModel(3, "Сыр", "250.0", "Гауда")
+                    )
+                )
+            )
         }
     }
 } 

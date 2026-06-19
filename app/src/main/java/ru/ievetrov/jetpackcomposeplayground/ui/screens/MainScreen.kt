@@ -53,7 +53,10 @@ fun MainScreen(
     navigateToBasicFlow: () -> Unit = {},
     navigateToFlowErrorHandling: () -> Unit = {},
     navigateToStateFlow: () -> Unit = {},
-    navigateToSharedFlow: () -> Unit = {}
+    navigateToSharedFlow: () -> Unit = {},
+    
+    // JCP-05
+    navigateToProductsScreen: () -> Unit = {}
 ) {
     JetpackComposePlaygroundTheme {
         Column(
@@ -259,6 +262,21 @@ fun MainScreen(
                 title = "События с SharedFlow",
                 description = "Эмиссия и сбор событий приложения с помощью MutableSharedFlow",
                 onClick = navigateToSharedFlow
+            )
+            
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            // JCP-05: Практика написания тестов
+            Text(
+                text = "JCP-05: Практика написания тестов",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            TaskCard(
+                title = "Тестирование экрана продуктов",
+                description = "Написание unit-тестов для маппера и валидатора, тестов ViewModel с Turbine, Compose UI-тестов и интеграционного теста репозитория",
+                onClick = navigateToProductsScreen
             )
             }
     }

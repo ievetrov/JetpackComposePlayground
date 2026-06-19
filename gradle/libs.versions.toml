@@ -16,9 +16,17 @@ composeBom = "2025.04.01"
 junit = "4.13.2"
 androidJunit = "1.2.1"
 espressoCore = "3.6.1"
+mockk = "1.13.14"
+turbine = "1.2.0"
+coroutinesTest = "1.9.0"
+mockwebserver = "4.12.0"
+kaspresso = "1.5.5"
+ksp = "2.0.21-1.0.28"
+room = "2.6.1"
 
 # Сторонние библиотеки
 coil = "2.6.0"
+material3 = "1.4.0"
 
 [libraries]
 # AndroidX Core
@@ -35,6 +43,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 
 # Navigation и ConstraintLayout
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
@@ -47,10 +56,25 @@ coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-viewmodel-testing = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-testing", version.ref = "lifecycleRuntimeKtx" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "mockwebserver" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+kaspresso = { group = "io.github.kakaocup", name = "kaspresso", version.ref = "kaspresso" }
+kaspresso-compose = { group = "io.github.kakaocup", name = "kaspresso-compose-support", version.ref = "kaspresso" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

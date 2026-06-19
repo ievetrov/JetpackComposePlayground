@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("kotlin-parcelize")
 }
 
@@ -52,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.material3)
     // Core Android и Jetpack
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -63,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.core)
     
     // Compose UI фреймворки
     implementation(libs.androidx.navigation.compose)
@@ -70,14 +73,31 @@ dependencies {
     
     // Обработка изображений
     implementation(libs.coil)
-    
+
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.okhttp)
+    ksp(libs.room.compiler)
+
     // Тестирование
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.lifecycle.viewmodel.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.turbine)
+    androidTestImplementation(libs.kaspresso)
+    androidTestImplementation(libs.kaspresso.compose)
+
     // Инструменты разработки
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
