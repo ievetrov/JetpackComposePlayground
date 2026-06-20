@@ -33,10 +33,12 @@ import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundThe
  * 4. Добавить кнопку "Выбрать все" / "Снять выбор"
  */
 
-// TODO 1: Создайте модель данных для элемента списка с флагом выбора
-data class SelectableItem(val id: Int, val title: String, var isSelected: Boolean = false)
+data class SelectableItem(
+    val id: Int,
+    val title: String,
+    var isSelected: Boolean = false
+)
 
-// Тестовые данные для списка
 val sampleSelectableItems = listOf(
     SelectableItem(1, "Яблоки"),
     SelectableItem(2, "Молоко"),
@@ -46,27 +48,42 @@ val sampleSelectableItems = listOf(
     SelectableItem(6, "Сыр")
 )
 
-// TODO 2: Создайте компонент для отображения одного элемента списка
-// @Composable
-// fun SelectableItemRow(
-//     item: SelectableItem,
-//     onCheckedChange: (Boolean) -> Unit
-// ) {
-//     Row(
-//         modifier = Modifier.fillMaxWidth().padding(8.dp),
-//         verticalAlignment = Alignment.CenterVertically
-//     ) {
-//         Checkbox(
-//             checked = item.isSelected,
-//             onCheckedChange = onCheckedChange
-//         )
-//         Spacer(modifier = Modifier.width(8.dp))
-//         Text(item.title)
-//     }
-// }
+@Composable
+fun SelectableItemRow(
+    item: SelectableItem,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = item.isSelected,
+            onCheckedChange = onCheckedChange
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = item.title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
 
 @Composable
 fun SelectableListScreen() {
+    val items = remember {
+        mutableStateListOf<SelectableItem>().apply {
+            addAll(sampleSelectableItems)
+        }
+    }
+
+    val selectedCount = items.count { it.isSelected }
+    val allSelected = items.isNotEmpty() && items.all { it.isSelected }
+
     JetpackComposePlaygroundTheme {
         Surface(
             modifier = Modifier.padding(16.dp),
@@ -77,46 +94,42 @@ fun SelectableListScreen() {
                     text = "JCP-02: Список с выбором",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
-                // TODO 2: Реализовать список элементов с чекбоксами
-                // val items = remember { mutableStateListOf<SelectableItem>().apply { addAll(sampleSelectableItems) } }
-                
-                // TODO 3: Обеспечить возможность выбора каждого элемента
-                // LazyColumn {
-                //     items(items) { item ->
-                //         SelectableItemRow(
-                //             item = item,
-                //             onCheckedChange = { isChecked ->
-                //                 val index = items.indexOfFirst { it.id == item.id }
-                //                 if (index != -1) {
-                //                     items[index] = items[index].copy(isSelected = isChecked)
-                //                 }
-                //             }
-                //         )
-                //     }
-                // }
-                
-                // TODO 4: Отображать количество выбранных элементов под списком
-                // val selectedCount = items.count { it.isSelected }
-                // Text("Выбрано: $selectedCount из ${items.size}")
-                
-                // TODO 5: Добавить кнопку "Выбрать все" / "Снять выбор"
-                // val allSelected = items.all { it.isSelected }
-                // Button(
-                //     onClick = {
-                //         val newState = !allSelected
-                //         for (i in items.indices) {
-                //             items[i] = items[i].copy(isSelected = newState)
-                //         }
-                //     }
-                // ) {
-                //     Text(if (allSelected) "Снять выбор" else "Выбрать все")
-                // }
-                
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn {
+                    items(items) { item ->
+                        SelectableItemRow(
+                            item = item,
+                            onCheckedChange = { isChecked ->
+                                val index = items.indexOfFirst { it.id == item.id }
+                                if (index != -1) {
+                                    items[index] = items[index].copy(isSelected = isChecked)
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
-                    "Здесь будет список с чекбоксами и счетчиком выбранных",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Выбрано: $selectedCount из ${items.size}",
+                    style = MaterialTheme.typography.bodyLarge
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        val newState = !allSelected
+                        for (i in items.indices) {
+                            items[i] = items[i].copy(isSelected = newState)
+                        }
+                    }
+                ) {
+                    Text(if (allSelected) "Снять выбор" else "Выбрать все")
+                }
             }
         }
     }
@@ -126,4 +139,4 @@ fun SelectableListScreen() {
 @Composable
 fun SelectableListScreenPreview() {
     SelectableListScreen()
-} 
+}

@@ -1,6 +1,8 @@
 package ru.ievetrov.jetpackcomposeplayground.tasks.jcp02
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundTheme
-
 /**
  * JCP-02: Простое состояние кнопок
  *
@@ -32,12 +33,15 @@ import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundThe
 
 @Composable
 fun SimpleButtonsScreen() {
+    var count by remember { mutableStateOf(0) }
+
     JetpackComposePlaygroundTheme {
         Surface(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.background
         ) {
-            Column {
+            Column (horizontalAlignment = Alignment.CenterHorizontally)
+            {
                 Text(
                     text = "JCP-02: Простое состояние кнопок",
                     style = MaterialTheme.typography.headlineMedium
@@ -45,7 +49,10 @@ fun SimpleButtonsScreen() {
                 
                 // TODO 1: Реализовать две кнопки с общим счётчиком нажатий
                 // Используйте: var count by remember { mutableStateOf(0) }
-                
+
+
+
+
                 // TODO 2: Увеличивать счётчик на 1 при нажатии первой кнопки
                 // Button(onClick = { count++ }) { Text("+1") }
                 
@@ -57,15 +64,39 @@ fun SimpleButtonsScreen() {
                 
                 // TODO 5: Предотвратить возможность ухода счётчика в отрицательные значения
                 // Добавьте проверку: if (count > 0) count--
-                
-                Text(
-                    "Здесь будут ваши кнопки и счётчик",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        onClick = { count++ }
+                    ) {
+                        Text("+1")
+                    }
+
+                    Text(
+                        text = "Счёт: $count",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
+                    Button(
+                        onClick = {
+                            if (count > 0) {
+                                count--
+                            }
+                        }
+                    ) {
+                        Text("-1")
+                    }
+                }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

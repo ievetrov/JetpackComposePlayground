@@ -2,18 +2,12 @@ package ru.ievetrov.jetpackcomposeplayground.tasks.jcp01
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +57,37 @@ import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundThe
 // Добавьте параметр isHighlighted: Boolean и условную логику цвета/стиля
 
 @Composable
+fun Greeting(
+    name: String,
+    isHighlighted: Boolean = false
+) {
+    val backgroundColor = if (isHighlighted) {
+        Color(0xFFFFF59D)
+    } else {
+        Color(0xFFE3F2FD)
+    }
+
+    val textColor = if (isHighlighted) {
+        Color.Red
+    } else {
+        Color.Black
+    }
+
+    Text(
+        text = "Hallo, $name!",
+        color = textColor,
+        style = if (isHighlighted) {
+            MaterialTheme.typography.headlineSmall
+        } else {
+            MaterialTheme.typography.bodyLarge
+        },
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .background(backgroundColor)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    )
+}
+@Composable
 fun DeclarativeComponentsScreen() {
     JetpackComposePlaygroundTheme {
         Surface(
@@ -71,7 +96,7 @@ fun DeclarativeComponentsScreen() {
         ) {
             Column {
                 Text(
-                    text = "JCP-01: Декларативные компоненты",
+                    text = "JCP-01: Declarative components",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 
@@ -80,10 +105,9 @@ fun DeclarativeComponentsScreen() {
                 // Greeting("Студент", isHighlighted = true) 
                 
                 // Пример использования:
-                Text(
-                    "Здесь будут ваши компоненты после выполнения заданий",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Greeting(name = "World")
+                Greeting(name = "Student", isHighlighted = true)
+                Greeting(name = "Alex")
             }
         }
     }
@@ -93,4 +117,20 @@ fun DeclarativeComponentsScreen() {
 @Composable
 fun DeclarativeComponentsScreenPreview() {
     DeclarativeComponentsScreen()
-} 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreviewNormal() {
+    JetpackComposePlaygroundTheme {
+        Greeting(name = "Мир")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreviewHighlighted() {
+    JetpackComposePlaygroundTheme {
+        Greeting(name = "Студент", isHighlighted = true)
+    }
+}

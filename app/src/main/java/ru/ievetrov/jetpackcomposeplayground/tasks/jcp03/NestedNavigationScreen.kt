@@ -3,25 +3,20 @@ package ru.ievetrov.jetpackcomposeplayground.tasks.jcp03
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,21 +28,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ru.ievetrov.jetpackcomposeplayground.ui.theme.JetpackComposePlaygroundTheme
-
-/**
- * JCP-03: Вложенная навигация
- *
- * Задание:
- * 1. Реализовать экран с нижней навигацией (BottomNavigation)
- * 2. Создать минимум 3 раздела (например, "Главная", "Избранное", "Профиль")
- * 3. Настроить отдельный навигационный граф для каждого раздела с подэкранами
- * 4. Обеспечить сохранение состояния каждого раздела при переключении
- * 5. Реализовать "глубокую" навигацию между разделами
- */
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 
 @Composable
 fun NestedNavigationScreen() {
     JetpackComposePlaygroundTheme {
+        val navController = rememberNavController()
+
         Surface(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.background
@@ -57,52 +47,49 @@ fun NestedNavigationScreen() {
                     text = "JCP-03: Вложенная навигация",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
-                // TODO: Реализуйте вложенную навигацию с bottom navigation
-                // Пример реализации:
-                
-                // val navController = rememberNavController()
-                
-                // Scaffold(
-                //     bottomBar = {
-                //         BottomNavigationBar(navController)
-                //     }
-                // ) { innerPadding ->
-                //     NavHost(
-                //         navController = navController,
-                //         startDestination = BottomNavItem.Home.route,
-                //         modifier = Modifier.padding(innerPadding)
-                //     ) {
-                //         // Граф для раздела "Главная"
-                //         composable(BottomNavItem.Home.route) {
-                //             HomeNavGraph(
-                //                 modifier = Modifier.fillMaxSize(),
-                //                 navigateToProfile = {
-                //                     // Пример глубокой навигации
-                //                     navController.navigate(BottomNavItem.Profile.route) {
-                //                         popUpTo(navController.graph.findStartDestination().id) {
-                //                             saveState = true
-                //                         }
-                //                         launchSingleTop = true
-                //                         restoreState = true
-                //                     }
-                //                 }
-                //             )
-                //         }
-                
-                //         // Граф для раздела "Избранное"
-                //         composable(BottomNavItem.Favorites.route) {
-                //             FavoritesNavGraph(modifier = Modifier.fillMaxSize())
-                //         }
-                
-                //         // Граф для раздела "Профиль"
-                //         composable(BottomNavItem.Profile.route) {
-                //             ProfileNavGraph(modifier = Modifier.fillMaxSize())
-                //         }
-                //     }
-                // }
+
+                Scaffold(
+                    bottomBar = {
+                        BottomNavigationBar(navController)
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = BottomNavItem.Home.route,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        composable(BottomNavItem.Home.route) {
+                            HomeNavGraph(
+                                modifier = Modifier.fillMaxSize(),
+                                navigateToProfile = {
+                                    navController.navigate(BottomNavItem.Profile.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            )
+                        }
+
+                        composable(BottomNavItem.Favorites.route) {
+                            FavoritesNavGraph(
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        composable(BottomNavItem.Profile.route) {
+                            ProfileNavGraph(
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -127,11 +114,11 @@ fun BottomNavigationBar(navController: NavHostController) {
         BottomNavItem.Favorites,
         BottomNavItem.Profile
     )
-    
+
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
-        
+
         items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.title) },
@@ -139,13 +126,10 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        // Избегаем создания множества копий одного экрана в бэкстеке
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
-                        // Избегаем дублирования экрана при повторных нажатиях
                         launchSingleTop = true
-                        // Восстанавливаем состояние при возврате
                         restoreState = true
                     }
                 }
@@ -163,7 +147,7 @@ fun HomeNavGraph(
     navigateToProfile: () -> Unit = {}
 ) {
     val homeNavController = rememberNavController()
-    
+
     NavHost(
         navController = homeNavController,
         startDestination = "home_main",
@@ -175,7 +159,7 @@ fun HomeNavGraph(
                 onNavigateToProfile = navigateToProfile
             )
         }
-        
+
         composable("home_details") {
             HomeDetailsScreen(
                 onBackClick = { homeNavController.popBackStack() }
@@ -190,7 +174,7 @@ fun HomeNavGraph(
 @Composable
 fun FavoritesNavGraph(modifier: Modifier = Modifier) {
     val favoritesNavController = rememberNavController()
-    
+
     NavHost(
         navController = favoritesNavController,
         startDestination = "favorites_main",
@@ -201,7 +185,7 @@ fun FavoritesNavGraph(modifier: Modifier = Modifier) {
                 onDetailsClick = { favoritesNavController.navigate("favorites_details") }
             )
         }
-        
+
         composable("favorites_details") {
             FavoritesDetailsScreen(
                 onBackClick = { favoritesNavController.popBackStack() }
@@ -216,7 +200,7 @@ fun FavoritesNavGraph(modifier: Modifier = Modifier) {
 @Composable
 fun ProfileNavGraph(modifier: Modifier = Modifier) {
     val profileNavController = rememberNavController()
-    
+
     NavHost(
         navController = profileNavController,
         startDestination = "profile_main",
@@ -227,7 +211,7 @@ fun ProfileNavGraph(modifier: Modifier = Modifier) {
                 onSettingsClick = { profileNavController.navigate("profile_settings") }
             )
         }
-        
+
         composable("profile_settings") {
             ProfileSettingsScreen(
                 onBackClick = { profileNavController.popBackStack() }
@@ -235,8 +219,6 @@ fun ProfileNavGraph(modifier: Modifier = Modifier) {
         }
     }
 }
-
-// Примеры экранов для вложенной навигации
 
 @Composable
 fun HomeMainScreen(
@@ -254,19 +236,19 @@ fun HomeMainScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
             onClick = onDetailsClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            modifier = Modifier.fillMaxSize(0.7f)
         ) {
             Text("Открыть детали")
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = onNavigateToProfile,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            modifier = Modifier.fillMaxSize(0.7f)
         ) {
             Text("Перейти к профилю")
         }
@@ -286,10 +268,9 @@ fun HomeDetailsScreen(onBackClick: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
-            onClick = onBackClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            onClick = onBackClick
         ) {
             Text("Назад")
         }
@@ -309,10 +290,9 @@ fun FavoritesMainScreen(onDetailsClick: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
-            onClick = onDetailsClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            onClick = onDetailsClick
         ) {
             Text("Открыть детали")
         }
@@ -332,10 +312,9 @@ fun FavoritesDetailsScreen(onBackClick: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
-            onClick = onBackClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            onClick = onBackClick
         ) {
             Text("Назад")
         }
@@ -355,10 +334,9 @@ fun ProfileMainScreen(onSettingsClick: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
-            onClick = onSettingsClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            onClick = onSettingsClick
         ) {
             Text("Настройки")
         }
@@ -378,10 +356,9 @@ fun ProfileSettingsScreen(onBackClick: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
-            onClick = onBackClick,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            onClick = onBackClick
         ) {
             Text("Назад")
         }
@@ -392,4 +369,4 @@ fun ProfileSettingsScreen(onBackClick: () -> Unit) {
 @Composable
 fun NestedNavigationScreenPreview() {
     NestedNavigationScreen()
-} 
+}
